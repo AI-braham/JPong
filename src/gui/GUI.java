@@ -114,6 +114,7 @@ public class GUI {
 	}
 	public void closeApp() {
 		frame.dispose();
+		System.exit(1);
 	}
 	private class MainMenu extends CPanel {
 		/**

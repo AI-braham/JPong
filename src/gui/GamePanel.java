@@ -32,6 +32,8 @@ public class GamePanel extends CPanel{
 	private Player playerTwo= new Player(2);
 	private ItemBall ball= new ItemBall();
 	
+	private boolean gameRunning=false;
+	
 	Stroke dotted = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
 	
 	private int scoreLimit=5;
@@ -60,6 +62,9 @@ public class GamePanel extends CPanel{
 			@Override
 			public void run() {
 				moveControl();
+				if(gameRunning) {
+					MoveBall();
+				}
 				
 			}
 			
@@ -68,8 +73,7 @@ public class GamePanel extends CPanel{
 	public void startGame() {
 		ball.setDirectX(1);
 		ball.setDirectY(1);
-		Thread hilo=new Thread(new MoveBall());
-		hilo.start();
+		gameRunning=true;
 	}
 	public void update() {
 		setBackground(Main.background_color);
@@ -179,83 +183,76 @@ public class GamePanel extends CPanel{
 			break;
 		}
 	}
-	private class MoveBall implements Runnable{
-
-		@Override
-		public void run() {
-			runtime:{
-			for(;;) {
+	private void MoveBall() {
+			try {
+				Thread.sleep(5-speedMultiplier);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if(ball.getX()<=0) {
+				ball.stopMovement();
+				playerTwo.setScore(playerTwo.getScore()+1);
 				try {
-					Thread.sleep(5-speedMultiplier);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				if(ball.getX()<=0) {
-					ball.stopMovement();
-					playerTwo.setScore(playerTwo.getScore()+1);
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					ball.setLocation(gameAreaWidth/2 - ball.getWidth()/2, gameAreaHeight/2);
-					playerOne.setLocation(20, (gameAreaHeight/2)-playerOne.getHeight());
-					playerTwo.setLocation(gameAreaWidth-20-playerTwo.getWidth(), (gameAreaHeight/2)-playerOne.getHeight());
-					revalidate();
-					repaint();
-					ball.setDirectX(1);
-					ball.setDirectY(1);
-					
-				}else if(ball.getX()>=gameAreaWidth - ball.getWidth()) {
-					ball.stopMovement();
-					playerOne.setScore(playerOne.getScore()+1);	
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					ball.setLocation(gameAreaWidth/2 - ball.getWidth()/2, gameAreaHeight/2);
-					playerOne.setLocation(20, (gameAreaHeight/2)-playerOne.getHeight());
-					playerTwo.setLocation(gameAreaWidth-20-playerTwo.getWidth(), (gameAreaHeight/2)-playerOne.getHeight());
-					revalidate();
-					repaint();
-					ball.setDirectX(-1);
-					ball.setDirectY(1);
+				ball.setLocation(gameAreaWidth/2 - ball.getWidth()/2, gameAreaHeight/2);
+				playerOne.setLocation(20, (gameAreaHeight/2)-playerOne.getHeight());
+				playerTwo.setLocation(gameAreaWidth-20-playerTwo.getWidth(), (gameAreaHeight/2)-playerOne.getHeight());
+				revalidate();
+				repaint();
+				ball.setDirectX(1);
+				ball.setDirectY(1);
 				
-				}else if(ball.getY()<=0 || ball.getY()>=gameAreaHeight) {
-					
-					ball.setDirectY(ball.getDirectY()*-1);
-					
-				}else if(ball.getX()==playerOne.getX() + playerOne.getWidth() && ball.getY()>= playerOne.getY() 
-				&& ball.getY()<=playerOne.getY()+playerOne.getHeight()) {
-					
-					ball.setDirectX(ball.getDirectX()*-1);
-					
-				}else if(ball.getX()==playerTwo.getX() - playerTwo.getWidth()/2 && ball.getY()>= playerTwo.getY() 
-				&& ball.getY()<=playerTwo.getY()+playerTwo.getHeight()) {
-					
-					ball.setDirectX(ball.getDirectX()*-1);
-					
+			}else if(ball.getX()>=gameAreaWidth - ball.getWidth()) {
+				ball.stopMovement();
+				playerOne.setScore(playerOne.getScore()+1);	
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				if(playerOne.getScore()==scoreLimit) {
-					GUI.gameOver("Player One wins");
-					ball.setDirectX(0);
-					ball.setDirectY(0);
-					playerOne.setScore(0);
-					playerTwo.setScore(0);
-					break runtime;
-					
-				}else if(playerTwo.getScore()==scoreLimit) {
-					GUI.gameOver("Player Two wins");
-					ball.setDirectX(0);
-					ball.setDirectY(0);
-					playerOne.setScore(0);
-					playerTwo.setScore(0);
-					break runtime;
-				}
-				ball.setLocation(ball.getX()+ball.getDirectX(), ball.getY() + ball.getDirectY());
-				}
+				ball.setLocation(gameAreaWidth/2 - ball.getWidth()/2, gameAreaHeight/2);
+				playerOne.setLocation(20, (gameAreaHeight/2)-playerOne.getHeight());
+				playerTwo.setLocation(gameAreaWidth-20-playerTwo.getWidth(), (gameAreaHeight/2)-playerOne.getHeight());
+				revalidate();
+				repaint();
+				ball.setDirectX(-1);
+				ball.setDirectY(1);
+			
+			}else if(ball.getY()<=0 || ball.getY()>=gameAreaHeight) {
+				
+				ball.setDirectY(ball.getDirectY()*-1);
+				
+			}else if(ball.getX()==playerOne.getX() + playerOne.getWidth() && ball.getY()>= playerOne.getY() 
+			&& ball.getY()<=playerOne.getY()+playerOne.getHeight()) {
+				
+				ball.setDirectX(ball.getDirectX()*-1);
+				
+			}else if(ball.getX()==playerTwo.getX() - playerTwo.getWidth()/2 && ball.getY()>= playerTwo.getY() 
+			&& ball.getY()<=playerTwo.getY()+playerTwo.getHeight()) {
+				
+				ball.setDirectX(ball.getDirectX()*-1);
+				
 			}
-		}
+			if(playerOne.getScore()==scoreLimit) {
+				GUI.gameOver("Player One wins");
+				ball.setDirectX(0);
+				ball.setDirectY(0);
+				playerOne.setScore(0);
+				playerTwo.setScore(0);
+				return;
+				
+			}else if(playerTwo.getScore()==scoreLimit) {
+				GUI.gameOver("Player Two wins");
+				ball.setDirectX(0);
+				ball.setDirectY(0);
+				playerOne.setScore(0);
+				playerTwo.setScore(0);
+				return;
+			}
+			ball.setLocation(ball.getX()+ball.getDirectX(), ball.getY() + ball.getDirectY());
+		
 	}
 }
